@@ -57,11 +57,7 @@ def temporal_difference(value, n, alpha):
 
         if time < T:
             # choose an action randomly
-            if np.random.binomial(1, 0.5) == 1:
-                next_state = state + 1
-            else:
-                next_state = state - 1
-
+            next_state = state + 1 if np.random.binomial(1, 0.5) == 1 else state - 1
             if next_state == 0:
                 reward = -1
             elif next_state == 20:
@@ -88,7 +84,7 @@ def temporal_difference(value, n, alpha):
                 returns += pow(GAMMA, n) * value[states[(update_time + n)]]
             state_to_update = states[update_time]
             # update the state value
-            if not state_to_update in END_STATES:
+            if state_to_update not in END_STATES:
                 value[state_to_update] += alpha * (returns - value[state_to_update])
         if update_time == T - 1:
             break
@@ -110,12 +106,12 @@ def figure7_2():
 
     # track the errors for each (step, alpha) combination
     errors = np.zeros((len(steps), len(alphas)))
-    for run in tqdm(range(0, runs)):
+    for _ in tqdm(range(0, runs)):
         for step_ind, step in zip(range(len(steps)), steps):
             for alpha_ind, alpha in zip(range(len(alphas)), alphas):
                 # print('run:', run, 'step:', step, 'alpha:', alpha)
                 value = np.zeros(N_STATES + 2)
-                for ep in range(0, episodes):
+                for _ in range(0, episodes):
                     temporal_difference(value, step, alpha)
                     # calculate the RMS error
                     errors[step_ind, alpha_ind] += np.sqrt(np.sum(np.power(value - TRUE_VALUE, 2)) / N_STATES)

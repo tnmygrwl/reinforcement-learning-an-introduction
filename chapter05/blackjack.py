@@ -32,9 +32,7 @@ def target_policy_player(usable_ace_player, player_sum, dealer_card):
 
 # function form of behavior policy of player
 def behavior_policy_player(usable_ace_player, player_sum, dealer_card):
-    if np.random.binomial(1, 0.5) == 1:
-        return ACTION_STAND
-    return ACTION_HIT
+    return ACTION_STAND if np.random.binomial(1, 0.5) == 1 else ACTION_HIT
 
 # policy for dealer
 POLICY_DEALER = np.zeros(22)
@@ -98,12 +96,10 @@ def play(policy_player, initial_state=None, initial_action=None):
 
         # initialize cards of dealer, suppose dealer will show the first card he gets
         dealer_card1 = get_card()
-        dealer_card2 = get_card()
-
     else:
         # use specified initial state
         usable_ace_player, player_sum, dealer_card1 = initial_state
-        dealer_card2 = get_card()
+    dealer_card2 = get_card()
 
     # initial state of the game
     state = [usable_ace_player, player_sum, dealer_card1]
@@ -116,7 +112,7 @@ def play(policy_player, initial_state=None, initial_action=None):
     elif dealer_card1 != 1 and dealer_card2 == 1:
         dealer_sum += dealer_card1 + 11
         usable_ace_dealer = True
-    elif dealer_card1 == 1 and dealer_card2 == 1:
+    elif dealer_card1 == 1:
         dealer_sum += 1 + 11
         usable_ace_dealer = True
     else:
@@ -143,14 +139,12 @@ def play(policy_player, initial_state=None, initial_action=None):
 
         # player busts
         if player_sum > 21:
-            # if player has a usable Ace, use it as 1 to avoid busting and continue
-            if usable_ace_player == True:
-                player_sum -= 10
-                usable_ace_player = False
-            else:
+            if usable_ace_player != True:
                 # otherwise player loses
                 return state, -1, player_trajectory
 
+            player_sum -= 10
+            usable_ace_player = False
     # dealer's turn
     while True:
         # get action based on current sum
@@ -159,21 +153,19 @@ def play(policy_player, initial_state=None, initial_action=None):
             break
         # if hit, get a new card
         new_card = get_card()
-        if new_card == 1 and dealer_sum + 11 < 21:
+        if new_card == 1 and dealer_sum < 10:
             dealer_sum += 11
             usable_ace_dealer = True
         else:
             dealer_sum += new_card
-        # dealer busts
         if dealer_sum > 21:
-            if usable_ace_dealer == True:
-            # if dealer has a usable Ace, use it as 1 to avoid busting and continue
-                dealer_sum -= 10
-                usable_ace_dealer = False
-            else:
+            if usable_ace_dealer != True:
             # otherwise dealer loses
                 return state, 1, player_trajectory
 
+            # if dealer has a usable Ace, use it as 1 to avoid busting and continue
+            dealer_sum -= 10
+            usable_ace_dealer = False
     # compare the sum between player and dealer
     if player_sum > dealer_sum:
         return state, 1, player_trajectory
@@ -190,7 +182,7 @@ def monte_carlo_on_policy(episodes):
     states_no_usable_ace = np.zeros((10, 10))
     # initialze counts to 1 to avoid 0 being divided
     states_no_usable_ace_count = np.ones((10, 10))
-    for i in tqdm(range(0, episodes)):
+    for _ in tqdm(range(0, episodes)):
         _, reward, player_trajectory = play(target_policy_player)
         for (usable_ace, player_sum, dealer_card), _ in player_trajectory:
             player_sum -= 12
@@ -246,7 +238,7 @@ def monte_carlo_off_policy(episodes):
     rhos = []
     returns = []
 
-    for i in range(0, episodes):
+    for _ in range(0, episodes):
         _, reward, player_trajectory = play(behavior_policy_player, initial_state=initial_state)
 
         # get the importance ratio
@@ -344,7 +336,7 @@ def figure_5_3():
     runs = 100
     error_ordinary = np.zeros(episodes)
     error_weighted = np.zeros(episodes)
-    for i in tqdm(range(0, runs)):
+    for _ in tqdm(range(0, runs)):
         ordinary_sampling_, weighted_sampling_ = monte_carlo_off_policy(episodes)
         # get the squared error
         error_ordinary += np.power(ordinary_sampling_ - true_value, 2)

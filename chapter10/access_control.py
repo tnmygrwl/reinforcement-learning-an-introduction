@@ -128,10 +128,12 @@ class ValueFunction:
 
     # get indices of active tiles for given state and action
     def get_active_tiles(self, free_servers, priority, action):
-        active_tiles = tiles(self.hash_table, self.num_of_tilings,
-                            [self.server_scale * free_servers, self.priority_scale * priority],
-                            [action])
-        return active_tiles
+        return tiles(
+            self.hash_table,
+            self.num_of_tilings,
+            [self.server_scale * free_servers, self.priority_scale * priority],
+            [action],
+        )
 
     # estimate the value of given state and action without subtracting average
     def value(self, free_servers, priority, action):
@@ -142,9 +144,7 @@ class ValueFunction:
     def state_value(self, free_servers, priority):
         values = [self.value(free_servers, priority, action) for action in ACTIONS]
         # if no free server, can't accept
-        if free_servers == 0:
-            return values[REJECT]
-        return np.max(values)
+        return values[REJECT] if free_servers == 0 else np.max(values)
 
     # learn with given sequence
     def learn(self, free_servers, priority, action, new_free_servers, new_priority, new_action, reward):

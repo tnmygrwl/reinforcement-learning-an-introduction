@@ -24,7 +24,7 @@ def b_steps(b):
     errors = []
 
     # sample 2b steps
-    for t in range(2 * b):
+    for _ in range(2 * b):
         v = np.random.choice(distribution)
         samples.append(v)
         errors.append(np.abs(np.mean(samples) - true_v))

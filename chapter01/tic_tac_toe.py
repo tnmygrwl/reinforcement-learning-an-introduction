@@ -40,14 +40,9 @@ class State:
     def is_end(self):
         if self.end is not None:
             return self.end
-        results = []
-        # check row
-        for i in range(0, BOARD_ROWS):
-            results.append(np.sum(self.data[i, :]))
+        results = [np.sum(self.data[i, :]) for i in range(0, BOARD_ROWS)]
         # check columns
-        for i in range(0, BOARD_COLS):
-            results.append(np.sum(self.data[:, i]))
-
+        results.extend(np.sum(self.data[:, i]) for i in range(0, BOARD_COLS))
         # check diagonals
         results.append(0)
         for i in range(0, BOARD_ROWS):
@@ -97,7 +92,7 @@ class State:
                     token = '0'
                 if self.data[i, j] == -1:
                     token = 'x'
-                out += token + ' | '
+                out += f'{token} | '
             print(out)
         print('-------------')
 
@@ -116,8 +111,7 @@ def get_all_states_impl(current_state, current_symbol, all_states):
 def get_all_states():
     current_symbol = 1
     current_state = State()
-    all_states = dict()
-    all_states[current_state.hash()] = (current_state, current_state.is_end())
+    all_states = {current_state.hash(): (current_state, current_state.is_end())}
     get_all_states_impl(current_state, current_symbol, all_states)
     return all_states
 
@@ -173,7 +167,7 @@ class Player:
     # @step_size: the step size to update estimations
     # @epsilon: the probability to explore
     def __init__(self, step_size=0.1, epsilon=0.1):
-        self.estimations = dict()
+        self.estimations = {}
         self.step_size = step_size
         self.epsilon = epsilon
         self.states = []
@@ -191,16 +185,13 @@ class Player:
         self.symbol = symbol
         for hash_val in all_states.keys():
             (state, is_end) = all_states[hash_val]
-            if is_end:
-                if state.winner == self.symbol:
-                    self.estimations[hash_val] = 1.0
-                elif state.winner == 0:
-                    # we need to distinguish between a tie and a lose
-                    self.estimations[hash_val] = 0.5
-                else:
-                    self.estimations[hash_val] = 0
-            else:
+            if is_end and state.winner == self.symbol:
+                self.estimations[hash_val] = 1.0
+            elif is_end and state.winner == 0 or not is_end:
+                # we need to distinguish between a tie and a lose
                 self.estimations[hash_val] = 0.5
+            else:
+                self.estimations[hash_val] = 0
 
     # update value estimation
     def backup(self):
@@ -233,9 +224,10 @@ class Player:
             self.greedy[-1] = False
             return action
 
-        values = []
-        for hash, pos in zip(next_states, next_positions):
-            values.append((self.estimations[hash], pos))
+        values = [
+            (self.estimations[hash], pos)
+            for hash, pos in zip(next_states, next_positions)
+        ]
         np.random.shuffle(values)
         values.sort(key=lambda x: x[0], reverse=True)
         action = values[0][1]
@@ -243,11 +235,11 @@ class Player:
         return action
 
     def save_policy(self):
-        with open('policy_%s.bin' % ('first' if self.symbol == 1 else 'second'), 'wb') as f:
+        with open(f"policy_{'first' if self.symbol == 1 else 'second'}.bin", 'wb') as f:
             pickle.dump(self.estimations, f)
 
     def load_policy(self):
-        with open('policy_%s.bin' % ('first' if self.symbol == 1 else 'second'), 'rb') as f:
+        with open(f"policy_{'first' if self.symbol == 1 else 'second'}.bin", 'rb') as f:
             self.estimations = pickle.load(f)
 
 # human interface
@@ -291,10 +283,10 @@ def train(epochs):
     player2_win = 0.0
     for i in range(1, epochs + 1):
         winner = judger.play(print=False)
-        if winner == 1:
-            player1_win += 1
         if winner == -1:
             player2_win += 1
+        elif winner == 1:
+            player1_win += 1
         print('Epoch %d, player 1 win %.02f, player 2 win %.02f' % (i, player1_win / i, player2_win / i))
         player1.backup()
         player2.backup()
@@ -310,12 +302,12 @@ def compete(turns):
     player2.load_policy()
     player1_win = 0.0
     player2_win = 0.0
-    for i in range(0, turns):
+    for _ in range(0, turns):
         winner = judger.play()
-        if winner == 1:
-            player1_win += 1
         if winner == -1:
             player2_win += 1
+        elif winner == 1:
+            player1_win += 1
         judger.reset()
     print('%d turns, player 1 win %.02f, player 2 win %.02f' % (turns, player1_win / turns, player2_win / turns))
 

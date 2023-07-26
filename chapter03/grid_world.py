@@ -50,13 +50,13 @@ def draw_image(image):
     nrows, ncols = image.shape
     width, height = 1.0 / ncols, 1.0 / nrows
 
+    color = 'white'
+
     # Add cells
     for (i,j), val in np.ndenumerate(image):
         # Index either the first or second item of bkg_colors based on
         # a checker board pattern
         idx = [j % 2, (j + 1) % 2][i % 2]
-        color = 'white'
-
         tb.add_cell(i, j, width, height, text=val, 
                     loc='center', facecolor=color)
 

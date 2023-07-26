@@ -183,12 +183,12 @@ class Sarsa:
 
     # get indices of active tiles for given state and action
     def get_active_tiles(self, position, velocity, action):
-        # I think positionScale * (position - position_min) would be a good normalization.
-        # However positionScale * position_min is a constant, so it's ok to ignore it.
-        active_tiles = tiles(self.hash_table, self.num_of_tilings,
-                            [self.position_scale * position, self.velocity_scale * velocity],
-                            [action])
-        return active_tiles
+        return tiles(
+            self.hash_table,
+            self.num_of_tilings,
+            [self.position_scale * position, self.velocity_scale * velocity],
+            [action],
+        )
 
     # estimate the value of given state and action
     def value(self, position, velocity, action):
@@ -202,7 +202,7 @@ class Sarsa:
         active_tiles = self.get_active_tiles(position, velocity, action)
         estimation = np.sum(self.weights[active_tiles])
         delta = target - estimation
-        if self.trace_update == accumulating_trace or self.trace_update == replacing_trace:
+        if self.trace_update in [accumulating_trace, replacing_trace]:
             self.trace_update(self.trace, active_tiles, self.lam)
         elif self.trace_update == dutch_trace:
             self.trace_update(self.trace, active_tiles, self.lam, self.step_size)
@@ -218,18 +218,16 @@ class Sarsa:
 
     # get # of steps to reach the goal under current state value function
     def cost_to_go(self, position, velocity):
-        costs = []
-        for action in ACTIONS:
-            costs.append(self.value(position, velocity, action))
+        costs = [self.value(position, velocity, action) for action in ACTIONS]
         return -np.max(costs)
 
 # get action at @position and @velocity based on epsilon greedy policy and @valueFunction
 def get_action(position, velocity, valueFunction):
     if np.random.binomial(1, EPSILON) == 1:
         return np.random.choice(ACTIONS)
-    values = []
-    for action in ACTIONS:
-        values.append(valueFunction.value(position, velocity, action))
+    values = [
+        valueFunction.value(position, velocity, action) for action in ACTIONS
+    ]
     return np.argmax(values) - 1
 
 # play Mountain Car for one episode based on given method @evaluator
@@ -278,7 +276,7 @@ def figure_12_10():
     steps = np.mean(steps, axis=2)
 
     for lamInd, lam in enumerate(lams):
-        plt.plot(alphas, steps[lamInd, :], label='lambda = %s' % (str(lam)))
+        plt.plot(alphas, steps[lamInd, :], label=f'lambda = {str(lam)}')
     plt.xlabel('alpha * # of tilings (8)')
     plt.ylabel('averaged steps per episode')
     plt.ylim([180, 300])

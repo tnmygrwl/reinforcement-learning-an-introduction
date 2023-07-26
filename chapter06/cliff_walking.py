@@ -85,9 +85,8 @@ def step(state, action):
 def choose_action(state, q_value):
     if np.random.binomial(1, EPSILON) == 1:
         return np.random.choice(ACTIONS)
-    else:
-        values_ = q_value[state[0], state[1], :]
-        return np.random.choice([action_ for action_, value_ in enumerate(values_) if value_ == np.max(values_)])
+    values_ = q_value[state[0], state[1], :]
+    return np.random.choice([action_ for action_, value_ in enumerate(values_) if value_ == np.max(values_)])
 
 # an episode with Sarsa
 # @q_value: values for state action pair, will be updated
@@ -173,7 +172,7 @@ def figure_6_4():
 
     rewards_sarsa = np.zeros(episodes)
     rewards_q_learning = np.zeros(episodes)
-    for r in tqdm(range(runs)):
+    for _ in tqdm(range(runs)):
         q_sarsa = np.zeros((WORLD_HEIGHT, WORLD_WIDTH, 4))
         q_q_learning = np.copy(q_sarsa)
         for i in range(0, episodes):
@@ -221,7 +220,7 @@ def figure_6_6():
     methods = range(0, 6)
 
     performace = np.zeros((6, len(step_sizes)))
-    for run in range(runs):
+    for _ in range(runs):
         for ind, step_size in tqdm(list(zip(range(0, len(step_sizes)), step_sizes))):
             q_sarsa = np.zeros((WORLD_HEIGHT, WORLD_WIDTH, 4))
             q_expected_sarsa = np.copy(q_sarsa)

@@ -31,10 +31,11 @@ def figure_4_3():
         for state in STATES[1:GOAL]:
             # get possilbe actions for current state
             actions = np.arange(min(state, GOAL - state) + 1)
-            action_returns = []
-            for action in actions:
-                action_returns.append(
-                    HEAD_PROB * state_value[state + action] + (1 - HEAD_PROB) * state_value[state - action])
+            action_returns = [
+                HEAD_PROB * state_value[state + action]
+                + (1 - HEAD_PROB) * state_value[state - action]
+                for action in actions
+            ]
             new_value = np.max(action_returns)
             delta += np.abs(state_value[state] - new_value)
             # update state value
@@ -46,11 +47,11 @@ def figure_4_3():
     policy = np.zeros(GOAL + 1)
     for state in STATES[1:GOAL]:
         actions = np.arange(min(state, GOAL - state) + 1)
-        action_returns = []
-        for action in actions:
-            action_returns.append(
-                HEAD_PROB * state_value[state + action] + (1 - HEAD_PROB) * state_value[state - action])
-
+        action_returns = [
+            HEAD_PROB * state_value[state + action]
+            + (1 - HEAD_PROB) * state_value[state - action]
+            for action in actions
+        ]
         # round to resemble the figure in the book, see
         # https://github.com/ShangtongZhang/reinforcement-learning-an-introduction/issues/83
         policy[state] = actions[np.argmax(np.round(action_returns[1:], 5)) + 1]

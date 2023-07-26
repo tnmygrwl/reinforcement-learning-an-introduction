@@ -37,14 +37,11 @@ def play():
 def figure_5_4():
     runs = 10
     episodes = 100000
-    for run in range(runs):
+    for _ in range(runs):
         rewards = []
-        for episode in range(0, episodes):
+        for _ in range(0, episodes):
             reward, trajectory = play()
-            if trajectory[-1] == ACTION_END:
-                rho = 0
-            else:
-                rho = 1.0 / pow(0.5, len(trajectory))
+            rho = 0 if trajectory[-1] == ACTION_END else 1.0 / pow(0.5, len(trajectory))
             rewards.append(rho * reward)
         rewards = np.add.accumulate(rewards)
         estimations = np.asarray(rewards) / np.arange(1, episodes + 1)

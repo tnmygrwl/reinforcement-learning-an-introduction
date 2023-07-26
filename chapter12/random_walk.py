@@ -184,11 +184,11 @@ def parameter_sweep(value_function_generator, runs, lambdas, alphas):
     episodes = 10
     # track the rms errors
     errors = [np.zeros(len(alphas_)) for alphas_ in alphas]
-    for run in tqdm(range(runs)):
+    for _ in tqdm(range(runs)):
         for lambdaIndex, rate in zip(range(len(lambdas)), lambdas):
             for alphaIndex, alpha in zip(range(len(alphas[lambdaIndex])), alphas[lambdaIndex]):
                 valueFunction = value_function_generator(rate, alpha)
-                for episode in range(episodes):
+                for _ in range(episodes):
                     random_walk(valueFunction)
                     stateValues = [valueFunction.value(state) for state in STATES]
                     errors[lambdaIndex][alphaIndex] += np.sqrt(np.mean(np.power(stateValues - TRUE_VALUE[1: -1], 2)))
@@ -198,7 +198,7 @@ def parameter_sweep(value_function_generator, runs, lambdas, alphas):
         error /= episodes * runs
 
     for i in range(len(lambdas)):
-        plt.plot(alphas[i], errors[i], label='lambda = ' + str(lambdas[i]))
+        plt.plot(alphas[i], errors[i], label=f'lambda = {str(lambdas[i])}')
     plt.xlabel('alpha')
     plt.ylabel('RMS error')
     plt.legend()

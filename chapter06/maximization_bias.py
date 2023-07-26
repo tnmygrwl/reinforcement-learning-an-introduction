@@ -54,15 +54,12 @@ TRANSITION = [[STATE_TERMINAL, STATE_B], [STATE_TERMINAL] * len(ACTIONS_B)]
 def choose_action(state, q_value):
     if np.random.binomial(1, EPSILON) == 1:
         return np.random.choice(STATE_ACTIONS[state])
-    else:
-        values_ = q_value[state]
-        return np.random.choice([action_ for action_, value_ in enumerate(values_) if value_ == np.max(values_)])
+    values_ = q_value[state]
+    return np.random.choice([action_ for action_, value_ in enumerate(values_) if value_ == np.max(values_)])
 
 # take @action in @state, return the reward
 def take_action(state, action):
-    if state == STATE_A:
-        return 0
-    return np.random.normal(-0.1, 1)
+    return 0 if state == STATE_A else np.random.normal(-0.1, 1)
 
 # if there are two state action pair value array, use double Q-Learning
 # otherwise use normal Q-Learning

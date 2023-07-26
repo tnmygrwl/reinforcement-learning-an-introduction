@@ -72,10 +72,7 @@ def semi_gradient_off_policy_TD(state, theta, alpha):
     action = behavior_policy(state)
     next_state = step(state, action)
     # get the importance ratio
-    if action == DASHED:
-        rho = 0.0
-    else:
-        rho = 1.0 / BEHAVIOR_SOLID_PROBABILITY
+    rho = 0.0 if action == DASHED else 1.0 / BEHAVIOR_SOLID_PROBABILITY
     delta = REWARD + DISCOUNT * np.dot(FEATURES[next_state, :], theta) - \
             np.dot(FEATURES[state, :], theta)
     delta *= rho * alpha
@@ -111,10 +108,7 @@ def TDC(state, theta, weight, alpha, beta):
     action = behavior_policy(state)
     next_state = step(state, action)
     # get the importance ratio
-    if action == DASHED:
-        rho = 0.0
-    else:
-        rho = 1.0 / BEHAVIOR_SOLID_PROBABILITY
+    rho = 0.0 if action == DASHED else 1.0 / BEHAVIOR_SOLID_PROBABILITY
     delta = REWARD + DISCOUNT * np.dot(FEATURES[next_state, :], theta) - \
             np.dot(FEATURES[state, :], theta)
     theta += alpha * rho * (delta * FEATURES[state, :] - DISCOUNT * FEATURES[next_state, :] * np.dot(FEATURES[state, :], weight))
@@ -159,10 +153,7 @@ def expected_emphatic_TD(theta, emphasis, alpha):
     # go through all the states
     for state in STATES:
         # compute rho(t-1)
-        if state == LOWER_STATE:
-            rho = 1.0 / BEHAVIOR_SOLID_PROBABILITY
-        else:
-            rho = 0
+        rho = 1.0 / BEHAVIOR_SOLID_PROBABILITY if state == LOWER_STATE else 0
         # update emphasis
         next_emphasis = DISCOUNT * rho * emphasis + INTEREST
         expected_next_emphasis += next_emphasis
@@ -208,7 +199,7 @@ def figure_11_2_left():
         thetas[:, step] = theta
 
     for i in range(FEATURE_SIZE):
-        plt.plot(thetas[i, :], label='theta' + str(i + 1))
+        plt.plot(thetas[i, :], label=f'theta{str(i + 1)}')
     plt.xlabel('Steps')
     plt.ylabel('Theta value')
     plt.title('semi-gradient off-policy TD')
@@ -229,7 +220,7 @@ def figure_11_2_right():
         thetas[:, sweep] = theta
 
     for i in range(FEATURE_SIZE):
-        plt.plot(thetas[i, :], label='theta' + str(i + 1))
+        plt.plot(thetas[i, :], label=f'theta{str(i + 1)}')
     plt.xlabel('Sweeps')
     plt.ylabel('Theta value')
     plt.title('semi-gradient DP')
@@ -267,7 +258,7 @@ def figure_11_6_left():
         RMSPBE[step] = compute_RMSPBE(theta)
 
     for i in range(FEATURE_SIZE):
-        plt.plot(thetas[i, :], label='theta' + str(i + 1))
+        plt.plot(thetas[i, :], label=f'theta{str(i + 1)}')
     plt.plot(RMSVE, label='RMSVE')
     plt.plot(RMSPBE, label='RMSPBE')
     plt.xlabel('Steps')
@@ -295,7 +286,7 @@ def figure_11_6_right():
         RMSPBE[sweep] = compute_RMSPBE(theta)
 
     for i in range(FEATURE_SIZE):
-        plt.plot(thetas[i, :], label='theta' + str(i + 1))
+        plt.plot(thetas[i, :], label=f'theta{str(i + 1)}')
     plt.plot(RMSVE, label='RMSVE')
     plt.plot(RMSPBE, label='RMSPBE')
     plt.xlabel('Sweeps')
@@ -330,7 +321,7 @@ def figure_11_7():
         RMSVE[sweep] = compute_RMSVE(theta)
 
     for i in range(FEATURE_SIZE):
-        plt.plot(thetas[i, :], label='theta' + str(i + 1))
+        plt.plot(thetas[i, :], label=f'theta{str(i + 1)}')
     plt.plot(RMSVE, label='RMSVE')
     plt.xlabel('Sweeps')
     plt.title('emphatic TD')

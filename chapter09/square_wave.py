@@ -33,14 +33,12 @@ DOMAIN = Interval(0.0, 2.0)
 
 # square wave function
 def square_wave(x):
-    if 0.5 < x < 1.5:
-        return 1
-    return 0
+    return 1 if 0.5 < x < 1.5 else 0
 
 # get @n samples randomly from the square wave
 def sample(n):
     samples = []
-    for i in range(0, n):
+    for _ in range(0, n):
         x = np.random.uniform(DOMAIN.left, DOMAIN.right)
         y = square_wave(x)
         samples.append([x, y])
@@ -61,7 +59,7 @@ class ValueFunction:
         # following is just one possible way
         step = (domain.size() - feature_width) / (num_of_features - 1)
         left = domain.left
-        for i in range(0, num_of_features - 1):
+        for _ in range(0, num_of_features - 1):
             self.features.append(Interval(left, left + feature_width))
             left += step
         self.features.append(Interval(left, domain.right))
@@ -71,11 +69,7 @@ class ValueFunction:
 
     # for point @x, return the indices of corresponding feature windows
     def get_active_features(self, x):
-        active_features = []
-        for i in range(0, len(self.features)):
-            if self.features[i].contain(x):
-                active_features.append(i)
-        return active_features
+        return [i for i in range(0, len(self.features)) if self.features[i].contain(x)]
 
     # estimate the value for point @x
     def value(self, x):

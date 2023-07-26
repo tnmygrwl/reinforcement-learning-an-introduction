@@ -49,7 +49,7 @@ POISSON_UPPER_BOUND = 11
 
 # Probability for poisson distribution
 # @lam: lambda should be less than 10 for this function
-poisson_cache = dict()
+poisson_cache = {}
 def poisson(n, lam):
     global poisson_cache
     key = n * 10 + lam
